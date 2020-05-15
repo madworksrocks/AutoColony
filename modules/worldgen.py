@@ -3,14 +3,16 @@ import json
 
 class Main:
     world_shape = (100,100,100)
-    tile_size = 11
+    tile_size = 11  # length of tile key(1 char), tile key, instance key
     mmap_mode = None
+    
     def __init__(self, main):
         self.main = main
 
     def create(self, wnf, wkf):
         self.main.worldnp = np.chararray(self.world_shape, itemsize=self.tile_size)
-        self.main.worldkeys = {}
+        np.empty(self.world_shape, dtype=np.int16)
+        self.main.worldkeys = []
 
         np.save(wnf, self.main.worldnp, allow_pickle=False)
         json.dump(self.main.worldkeys, wkf)
