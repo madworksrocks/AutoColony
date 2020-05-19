@@ -73,7 +73,7 @@ Choose option(1 or 2): """
 
     def create(self):
         self.main.data = {
-            "robots": [{"Name": "Bob", "pos":self.main.MM.modules["worldgen"].self.world_middle_surface}]
+            "robots": [{"Name": "Bob", "pos":self.main.MM.modules["worldgen"].world_middle_surface}]
         }
 
         with open(self.world_np_path, "wb") as wnf:
