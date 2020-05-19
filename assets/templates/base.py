@@ -11,7 +11,6 @@ def add_to_tile_ids(func):
 
     return func
 
-
 # @add_to_tile_ids
 class Template(Tile):
     requires_instance_data = False

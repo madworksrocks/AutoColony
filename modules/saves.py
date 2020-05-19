@@ -2,7 +2,7 @@ import os
 import json
 
 class Main:
-
+    save_path = None
     def __init__(self, main):
         self.main = main
 
@@ -21,21 +21,21 @@ class Main:
 
         if data["last opened"] == "":
             if len(dir) > 1:
-                msg = "No save recently opened.\
-1) Load save.\
-2) Create new save.\
-3) Exit.\
-Choose option(1, 2 or 3): "
+                msg = """No save recently opened.
+1) Load save.
+2) Create new save.
+3) Exit.
+Choose option(1, 2 or 3): """
                 required = ["1", "2", "3"]
             else:
-                msg = "No saves present.\
-1) Load save.\
-2) Exit.\
-Choose option(1 or 2): "
+                msg = """No saves present.
+1) Create new save.
+2) Exit.
+Choose option(1 or 2): """
                 required = ["1", "2"]
             action = prompt(msg, required)
 
-            if action == "1":
+            if action == "1" and len(required) == 3:
                 msg = ""
                 required = []
                 for savef in dir:
@@ -45,21 +45,23 @@ Choose option(1 or 2): "
                 msg += "\nChoose save name: "
                 savef = prompt(msg, required)
                 self.savef = savef
-                self.world_np_path = os.path.join(self.main.mainpath, "saves", self.savef, "world_np.npy")
-                self.world_keys_path = os.path.join(self.main.mainpath, "saves", self.savef, "world_keys.json")
-                self.world_data_path = os.path.join(self.main.mainpath, "saves", self.savef, "world_data.json")
+                self.save_path = os.path.join(self.main.mainpath, "saves", self.savef)
+                self.world_np_path = os.path.join(self.save_path, "world_np.npy")
+                self.world_keys_path = os.path.join(self.save_path, "world_keys.json")
+                self.world_data_path = os.path.join(self.save_path, "world_data.json")
                 self.load()
             
-            elif action == "2" and len(required) == 3:
+            elif action == "2" and len(required) == 3 or action == "1" and len(required) == 2:
                 msg = "Enter save name: "
                 savef = prompt(msg)
                 while not savef.isalpha:
                     print("Save name must only contain alphabets. Retry.")
                     savef = prompt(msg)
                 self.savef = savef
-                self.world_np_path = os.path.join(self.main.mainpath, "saves", self.savef, "world_np.npy")
-                self.world_keys_path = os.path.join(self.main.mainpath, "saves", self.savef, "world_keys.json")
-                self.world_data_path = os.path.join(self.main.mainpath, "saves", self.savef, "world_data.json")
+                self.save_path = os.path.join(self.main.mainpath, "saves", self.savef)
+                self.world_np_path = os.path.join(self.save_path, "world_np.npy")
+                self.world_keys_path = os.path.join(self.save_path, "world_keys.json")
+                self.world_data_path = os.path.join(self.save_path, "world_data.json")
                 self.create()
 
             else:

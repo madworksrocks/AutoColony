@@ -19,9 +19,11 @@ class Main:
     def import_modules(self):
         self.modules = []        
 
-        for fname in os.listdir():
+        for fname in os.listdir("modules"):
             if fname != "modulemanager.py" and fname[-3:] == ".py":
-                self.modules.append(import_module("."+fname[:-3]).Main(self.main))
+                mod = import_module(fname[:-3], 
+                    package=path_join(self.main.mainpath, "modules"))
+                self.modules.append(mod.Main(self.main))
 
         for module in self.modules:
             if "post_init" in dir(module):
