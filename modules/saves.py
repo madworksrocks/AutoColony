@@ -50,6 +50,7 @@ Choose option(1 or 2): """
                 self.world_np_path = os.path.join(self.save_path, "world_np.npy")
                 self.world_keys_path = os.path.join(self.save_path, "world_keys.json")
                 self.world_data_path = os.path.join(self.save_path, "world_data.json")
+                self.script_path = os.path.join(self.save_path, "script.py")
                 self.load()
             
             elif action == "2" and len(required) == 3 or action == "1" and len(required) == 2:
@@ -64,13 +65,16 @@ Choose option(1 or 2): """
                 self.world_np_path = os.path.join(self.save_path, "world_np.npy")
                 self.world_keys_path = os.path.join(self.save_path, "world_keys.json")
                 self.world_data_path = os.path.join(self.save_path, "world_data.json")
+                self.script_path = os.path.join(self.save_path, "script.py")
                 self.create()
 
             else:
                 quit()
 
     def create(self):
-        self.main.data = {}
+        self.main.data = {
+            "robots": [{"Name": "Bob", "pos":self.main.MM.modules["worldgen"].self.world_middle_surface}]
+        }
 
         with open(self.world_np_path, "wb") as wnf:
             with open(self.world_keys_path, "w") as wkf:
@@ -78,7 +82,19 @@ Choose option(1 or 2): """
 
         with open(self.world_data_path, "w") as wdf:
             json.dump(self.main.data, wdf)
-        
+
+        with open(self.script_path, "w") as sf:
+            sf.write("""
+
+def init():
+    pass
+
+def step(robots_proxy):
+    global robots
+    robots = robots_proxy
+
+""")
+
     def load(self):
         with open(self.world_np_path, "rb") as wnf:
             with open(self.world_keys_path, "r") as wkf:
@@ -86,6 +102,8 @@ Choose option(1 or 2): """
 
         with open(self.world_data_path, "r") as wdf:
             self.main.data = json.load(wdf)
+
+        self.main.MM.modules["robot"].load_script(self.save_path, self.script_path)
 
     def save(self):
         with open(self.world_np_path, "wb") as wnf:

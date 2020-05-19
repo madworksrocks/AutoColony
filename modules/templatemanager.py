@@ -37,4 +37,6 @@ class Main:
                             quit()
                     else:
                         self.templates.append(tile_ids.pop(0))
+
+        self.main.templates = self.templates
                     
