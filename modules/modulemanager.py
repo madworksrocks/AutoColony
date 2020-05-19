@@ -17,15 +17,16 @@ class Main:
         self.import_modules()
 
     def import_modules(self):
-        self.modules = []        
+        self.modules = {}    
 
         for fname in os.listdir("modules"):
             if fname != "modulemanager.py" and fname[-3:] == ".py":
                 mod = import_module(fname[:-3], 
                     package=path_join(self.main.mainpath, "modules"))
-                self.modules.append(mod.Main(self.main))
+                self.modules[fname[:-3]] = mod.Main(self.main)
 
-        for module in self.modules:
+    def post_init(self):
+        for module in self.modules.values():
             if "post_init" in dir(module):
                 module.post_init()
     

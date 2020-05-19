@@ -13,7 +13,7 @@ class Main:
 
         self.import_templates()
 
-        print(self.templates)
+        print("templates loaded: ", self.templates)
 
     def import_templates(self):
         for fname in os.listdir():

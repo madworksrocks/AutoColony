@@ -38,6 +38,7 @@ Choose option(1 or 2): """
             if action == "1" and len(required) == 3:
                 msg = ""
                 required = []
+                msg = "Available saves: "
                 for savef in dir:
                     if os.path.isdir(savef):
                         msg += f"\n{savef}"
@@ -59,6 +60,7 @@ Choose option(1 or 2): """
                     savef = prompt(msg)
                 self.savef = savef
                 self.save_path = os.path.join(self.main.mainpath, "saves", self.savef)
+                os.mkdir(self.save_path)
                 self.world_np_path = os.path.join(self.save_path, "world_np.npy")
                 self.world_keys_path = os.path.join(self.save_path, "world_keys.json")
                 self.world_data_path = os.path.join(self.save_path, "world_data.json")
@@ -70,7 +72,7 @@ Choose option(1 or 2): """
     def create(self):
         self.main.data = {}
 
-        with open(self.world_np_path, "w") as wnf:
+        with open(self.world_np_path, "wb") as wnf:
             with open(self.world_keys_path, "w") as wkf:
                 self.main.MM.modules["worldgen"].create(wnf, wkf)
 
@@ -78,7 +80,7 @@ Choose option(1 or 2): """
             json.dump(self.main.data, wdf)
         
     def load(self):
-        with open(self.world_np_path, "r") as wnf:
+        with open(self.world_np_path, "rb") as wnf:
             with open(self.world_keys_path, "r") as wkf:
                 self.main.MM.modules["worldgen"].load(wnf, wkf)
 
@@ -86,7 +88,7 @@ Choose option(1 or 2): """
             self.main.data = json.load(wdf)
 
     def save(self):
-        with open(self.world_np_path, "w") as wnf:
+        with open(self.world_np_path, "wb") as wnf:
             with open(self.world_keys_path, "w") as wkf:
                 self.main.MM.modules["worldgen"].save(wnf, wkf)
 
