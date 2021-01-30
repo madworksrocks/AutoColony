@@ -10,17 +10,10 @@ class Main:
         self.MM.post_init()
 
     def quit(self):
-        self.MM.modules["saves"].save()
+        for module in self.MM.modules.values():
+            if hasattr(module, "end"):
+                module.end()
         
 
 if __name__ == "__main__":
     main = Main()
-
-    robot = main.MM.modules["robot"]
-    gui = main.MM.modules["gui"]
-
-    gui.post_post_init()
-
-    while True:
-        robot.step()
-        gui.step()

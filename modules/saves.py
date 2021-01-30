@@ -1,117 +1,112 @@
 import os
 import json
 
-class Main:
-    save_path = None
-    def __init__(self, main):
-        self.main = main
+GENERIC_DATA_FILE = {
+    "last_opened": ""
+}
 
-    def post_init(self):
-        os.chdir(os.path.join(self.main.mainpath, "saves"))
-        dir = os.listdir()
-        if "data.json" not in dir:
-            with open("data.json", "w") as f:
-                data = {
-                    "last opened": ""
-                }
-                json.dump(data, f)
+LAST_OPENED_SAVE_PROMPT = """Last opened save found.
+Loading last opened save file. (n to cancel): """
 
-        with open("data.json") as f:
-            data = json.load(f)
+NO_SAVES_PROMPT = """No save present.
+1) Create new save.
+2) Exit.
+Choose option(1 or 2): """
 
-        if data["last opened"] == "":
-            if len(dir) > 1:
-                msg = """No save recently opened.
+SAVES_PROMPT = """Save(s) found.
 1) Load save.
 2) Create new save.
 3) Exit.
 Choose option(1, 2 or 3): """
-                required = ["1", "2", "3"]
-            else:
-                msg = """No saves present.
-1) Create new save.
-2) Exit.
-Choose option(1 or 2): """
-                required = ["1", "2"]
-            action = prompt(msg, required)
 
-            if action == "1" and len(required) == 3:
-                msg = ""
-                required = []
-                msg = "Available saves: "
-                for savef in dir:
-                    if os.path.isdir(savef):
-                        msg += f"\n{savef}"
-                        required.append(savef)
-                msg += "\nChoose save name: "
-                savef = prompt(msg, required)
-                self.savef = savef
-                self.save_path = os.path.join(self.main.mainpath, "saves", self.savef)
-                self.world_np_path = os.path.join(self.save_path, "world_np.npy")
-                self.world_keys_path = os.path.join(self.save_path, "world_keys.json")
-                self.world_data_path = os.path.join(self.save_path, "world_data.json")
-                self.script_path = os.path.join(self.save_path, "script.py")
-                self.load()
-            
-            elif action == "2" and len(required) == 3 or action == "1" and len(required) == 2:
-                msg = "Enter save name: "
-                savef = prompt(msg)
-                while not savef.isalpha:
-                    print("Save name must only contain alphabets. Retry.")
-                    savef = prompt(msg)
-                self.savef = savef
-                self.save_path = os.path.join(self.main.mainpath, "saves", self.savef)
-                os.mkdir(self.save_path)
-                self.world_np_path = os.path.join(self.save_path, "world_np.npy")
-                self.world_keys_path = os.path.join(self.save_path, "world_keys.json")
-                self.world_data_path = os.path.join(self.save_path, "world_data.json")
-                self.script_path = os.path.join(self.save_path, "script.py")
-                self.create()
 
-            else:
-                quit()
+class Main:
+    def __init__(self, main):
+        self.main = main
+        self.all_saves_path = os.path.join(self.main.mainpath, "saves")
+        self.save_name = None
+        self.data_path = os.path.join(self.all_saves_path, "data.json")
+        self.data = None
 
-    def create(self):
-        self.main.data = {
-            "robots": [{"Name": "Bob", "pos":self.main.MM.modules["worldgen"].world_middle_surface}]
-        }
-
-        with open(self.world_np_path, "wb") as wnf:
-            with open(self.world_keys_path, "w") as wkf:
-                self.main.MM.modules["worldgen"].create(wnf, wkf)
-
-        with open(self.world_data_path, "w") as wdf:
-            json.dump(self.main.data, wdf)
-
-        with open(self.script_path, "w") as sf:
-            sf.write("""
-
-def init():
-    pass
-
-def step(robots_proxy):
-    global robots
-    robots = robots_proxy
-
-""")
+    def post_init(self):
+        self.load()
 
     def load(self):
-        with open(self.world_np_path, "rb") as wnf:
-            with open(self.world_keys_path, "r") as wkf:
-                self.main.MM.modules["worldgen"].load(wnf, wkf)
+        self.load_data_file()
+        if os.path.isdir(os.path.join(self.all_saves_path, self.data["last_opened"])): 
+            if prompt(LAST_OPENED_SAVE_PROMPT) == "n":
+                self.prompt_load()
+            else:
+                self.quick_load()
+        else:
+            self.data["last_opened"] = ""
+            self.save_data_file()
+            self.prompt_load()
 
-        with open(self.world_data_path, "r") as wdf:
-            self.main.data = json.load(wdf)
+    def save_data_file(self):
+        with open(self.data_path, "wb") as file_handle:
+            json.dump(self.data, file_handle)
 
-        self.main.MM.modules["robot"].load_script(self.save_path, self.script_path)
+    def load_data_file(self):
+        if "data.json" not in os.listdir(self.all_saves_path):
+            self.data = GENERIC_DATA_FILE
+            self.save_data_file()
+
+        with open(self.data_path, "rb") as file_handle:
+            self.data = json.load(file_handle)
+
+    def quick_load(self, data):
+        pass
+    
+    def prompt_load(self):
+        if len(os.listdir(self.all_saves_path)) > 1:
+            msg = SAVES_PROMPT
+            required = ["1", "2", "3"]
+        else:
+            msg = NO_SAVES_PROMPT
+            required = ["1", "2"]
+
+        action = prompt(msg, required)
+
+        if action == "1" and len(required) == 3:
+            msg = ""
+            required = []
+            msg = "Available saves: "
+            for savef in os.listdir(self.all_saves_path):
+                if os.path.isdir(savef):
+                    msg += f"\n{savef}"
+                    required.append(savef)
+            msg += "\nChoose save name: "
+            save_name = prompt(msg, required)
+            self.save_name = safef
+            self.save_path = os.path.join(self.all_saves_path, self.save_name)
+            self.load()
+        
+        elif action == "2" and len(required) == 3 or action == "1" and len(required) == 2:
+            msg = "Enter save name: "
+            save_name = prompt(msg)
+            while not save_name.isalpha:
+                print("Save name must only contain alphabets. Retry.")
+                save_name = prompt(msg)
+            self.save_name = save_name
+            self.save_path = os.path.join(self.all_saves_path, self.save_name)
+            os.mkdir(self.save_path)
+            self.create()
+
+        else:
+            self.main.quit()
+        
+    def create(self):
+        pass
+
+    def load_game(self):
+        self.load_data_file()
 
     def save(self):
-        with open(self.world_np_path, "wb") as wnf:
-            with open(self.world_keys_path, "w") as wkf:
-                self.main.MM.modules["worldgen"].save(wnf, wkf)
-
-        with open(self.world_data_path, "w") as wdf:
-            json.dump(self.main.data, wdf)
+        self.save_data_file()
+        
+    def end(self):
+        self.save()
 
 def prompt(msg, required=None):
     if required is None:

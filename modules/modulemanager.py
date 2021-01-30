@@ -20,13 +20,14 @@ class Main:
         self.modules = {}    
 
         for fname in os.listdir("modules"):
-            if fname != "modulemanager.py" and fname[-3:] == ".py":
-                mod = import_module(fname[:-3], 
-                    package=path_join(self.main.mainpath, "modules"))
-                self.modules[fname[:-3]] = mod.Main(self.main)
+            if os.path.isfile(os.path.join("modules", fname)):
+                if fname != "modulemanager.py" and fname[-3:] == ".py":
+                    mod = import_module(fname[:-3], 
+                        package=path_join(self.main.mainpath, "modules"))
+                    self.modules[fname[:-3]] = mod.Main(self.main)
 
     def post_init(self):
         for module in self.modules.values():
-            if "post_init" in dir(module):
+            if hasattr(module, "post_init"):
                 module.post_init()
     
